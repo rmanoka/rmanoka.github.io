@@ -1,0 +1,60 @@
+body {
+  counter-reset: equation section figure;
+}
+
+t-section> h1::before {
+  counter-increment: section;
+  content: counters(section, '.');
+  padding-right: 0.5em;
+}
+
+t-section> h2::before {
+  counter-increment: section;
+  content: counters(section, '.');
+  padding-right: 0.5em;
+}
+
+t-section> h3::before {
+  counter-increment: section;
+  content: counters(section, '.');
+  padding-right: 0.5em;
+}
+
+t-section> h4::before {
+  counter-increment: section;
+  content: counters(section, '.');
+  padding-right: 0.5em;
+}
+
+t-section> h5::before {
+  counter-increment: section;
+  content: counters(section, '.');
+  padding-right: 0.5em;
+}
+
+t-section> h6::before {
+  counter-increment: section;
+  content: counters(section, '.');
+  padding-right: 0.5em;
+}
+
+t-section> div.section-content {
+  counter-reset: section;
+}
+
+figure {
+  counter-increment: figure;
+}
+
+figure img-caption:before {
+    content: "Figure " counter(figure) ". ";
+  }
+
+span.katex-display:after {
+  counter-increment: equation;
+  content: "(" counter(equation) ")";
+  padding: 0 2em;
+  margin-right: -1em;
+  font-weight: bold;
+  float: right;
+}

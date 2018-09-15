@@ -1,0 +1,315 @@
+
+<!doctype html>
+<html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="482d6bca00e16fb23cbed0e1c03d5348.css" id="id"><title>Type-system</title><link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css"><script src="main.js" type="text/javascript" defer=""></script><link rel="stylesheet" type="text/css" href="bf6c14925e66edb1526b6c9489b3c042.css" id="id"></head><body><t-document><title-block class="no-header-annotation">
+<h1>Rust - Type Systems</h1>
+<h2>Beginners Perspective</h2>
+<abstract-block><p>We study the type system of the rust language using a few case studies.  The focus is on the effective usage of the type system.</p>
+
+</abstract-block>
+</title-block>
+<t-section id="introduction" data-section-level="2"><h2 class="section-header"><a href="#introduction">Introduction</a></h2><div class="section-content">
+<p><strong>Rust</strong> is a <em>statically-typed</em> language.</p>
+<p><strong>Type checker</strong>, does a <em>sanity check</em> of the program at <em>compile-time</em>.</p>
+<t-section id="distinct-features" data-section-level="3"><h3 class="section-header"><a href="#distinct-features">Distinct Features</a></h3><div class="section-content">
+<ol>
+<li>
+<p><strong>Ownership:</strong>  values <em>owned</em> by variables.</p>
+<pre><code class="language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> x = <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"hello"</span>);
+    <span class="hljs-keyword">let</span> y = x;
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, x); <span class="hljs-comment">// ERROR.</span>
+}
+</code></pre>
+<ol>
+<li>
+<p><strong>Garbage Collection:</strong> values dropped when owners scope ends.  <em>Automatic garbage-collection</em>.</p>
+</li>
+<li>
+<p><strong>Move Semantics:</strong> assignment <em>moves</em> values.  Leads to many code-gen. optimizations.</p>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>Lifetimes.</strong> <em>References</em> to values are <em>borrowed</em>.</p>
+<p>Implicit <em>lifetime</em> parameter checked against the scope of the value as dictated by its owner.</p>
+</li>
+<li>
+<p><strong>Types and Traits.</strong> Values can be of various customizable types, and the types themselves may belong to different traits, each imparting distinct functionality on the value.</p>
+<p><a href="https://www.cliffsnotes.com/study-guides/psychology/psychology/psychology-personality/trait-and-type-perspectives">Aside: a psychological definition</a>:</p>
+<blockquote>
+<p>A trait is a characteristic pattern of behavior or conscious motive which can be self‐assessed or assessed by peers. The term type is used to identify a certain collection of traits that make up a broad, general personality classification.</p>
+</blockquote>
+</li>
+</ol>
+</div></t-section><t-section id="benefits" data-section-level="3"><h3 class="section-header"><a href="#benefits">Benefits</a></h3><div class="section-content">
+<ul>
+<li>
+<p><strong>Correctness.</strong> Fix many simple bugs at compile-time: no <em>undefined behaviour</em>.  Provides guarantees on behaviour: aids in <em>formal verification</em>.</p>
+</li>
+<li>
+<p><strong>Optimizations.</strong> eg. move-semantics, compile-time evaluations, etc.</p>
+</li>
+</ul>
+</div></t-section></div></t-section><t-section id="limits-of-type-checking" data-section-level="2"><h2 class="section-header"><a href="#limits-of-type-checking">Limits of Type Checking</a></h2><div class="section-content">
+<p><em>Type checkers are inherently conservative</em> (if the language is turing-complete).</p>
+<ul>
+<li>
+<p><strong>Completeness.</strong>  <em>All correct programs are valid.</em><br>
+eg. expected run-time behaviour when compiled using <code>unsafe</code> blocks.</p>
+</li>
+<li>
+<p><strong>Soundness.</strong>  <em>All valid programs are correct.</em><br>
+eg. no <em>undefined behaviour</em>.</p>
+</li>
+</ul>
+<p>Can have <em>only one of the above</em>.</p>
+<p>Usually <em>soundness is preferred</em> as it provides <em>concrete guarantees</em>.</p>
+<p><em>Prevents incorrect looking</em> programs (even if they may really be correct).</p>
+<t-section id="swapping-references" data-section-level="3"><h3 class="section-header"><a href="#swapping-references">Swapping References</a></h3><div class="section-content">
+<p>A simple example is that of swapping two (<code>mut</code>) references.</p>
+<pre><code class="language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">swap_wrong</span></span>&lt;<span class="hljs-symbol">'a</span>&gt;(x: &amp;<span class="hljs-symbol">'a</span> <span class="hljs-keyword">mut</span> <span class="hljs-built_in">String</span>,
+                  y: &amp;<span class="hljs-symbol">'a</span> <span class="hljs-keyword">mut</span> <span class="hljs-built_in">String</span>) {
+    <span class="hljs-keyword">let</span> t = *y;
+    *y = *x;
+    *x = t;
+}
+</code></pre>
+<pre><code class="language-rust hljs"><span class="hljs-keyword">let</span> t = *y;
+        ^^
+        |
+        cannot <span class="hljs-keyword">move</span> out of borrowed content
+        help: consider using a reference instead: `&amp;*y`
+</code></pre>
+<p>Instead, we must use <em><code>std::mem::swap</code></em> (which implements it using <em>unsafe code</em>).</p>
+<pre><code class="language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> x = <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"hello"</span>);
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> y = <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"world"</span>);
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{} {}"</span>, x, y);
+
+    <span class="hljs-comment">// This works.</span>
+    std::mem::swap(&amp;<span class="hljs-keyword">mut</span> x, &amp;<span class="hljs-keyword">mut</span> y);
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{} {}"</span>, x, y);
+}
+</code></pre>
+<p><em>Bypasses the type-system</em>, but simple enough.<br>
+<em>Easy to verify</em> that it is safe.</p>
+<p>This is a <em>powerful paradigm, but requires careful design.</em></p>
+<p>Possibly <em>prove correctness</em> via <em>formal verification</em>.</p>
+</div></t-section><t-section id="self-referential-structs" data-section-level="3"><h3 class="section-header"><a href="#self-referential-structs">Self-Referential Structs</a></h3><div class="section-content">
+<p>An important use-case not handled by the type-system.</p>
+<pre><code class="language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">S</span></span>&lt;<span class="hljs-symbol">'a</span>, T: <span class="hljs-symbol">'a</span>&gt; {
+    data: T,
+    pointer: &amp;<span class="hljs-symbol">'a</span> T,
+}
+
+<span class="hljs-keyword">impl</span>&lt;<span class="hljs-symbol">'a</span>, T&gt; S&lt;<span class="hljs-symbol">'a</span>, T&gt; {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(data: T) -&gt; S&lt;<span class="hljs-symbol">'a</span>, T&gt; {
+        S {data, pointer: &amp;data}
+    }
+}
+</code></pre>
+<p>This does not compile:</p>
+<pre><code class="language-rust hljs">error[E0597]: `data` does not live long enough
+|     S {data, pointer: &amp;data}
+|                        ^^^^ borrowed value does not live long enough
+| }
+| - borrowed value only lives until here
+</code></pre>
+<p>Issue is with <em>moving</em> (or even copying) the struct: <em>invalidates pointer addresses</em>.<br>
+Prevented by the <em>lifetime checker</em>.</p>
+<p>This is relevant for <em>co-routines</em> used to implement <em>iterators and async/await futures</em>.<br>
+A <em>stack-frame</em> may contain self-references.</p>
+
+
+</div></t-section></div></t-section><t-section id="co-routines" data-section-level="2"><h2 class="section-header"><a href="#co-routines">Co-Routines</a></h2><div class="section-content">
+<p>Rust (nightly) supports <em>async &amp; await</em> semantics.</p>
+<pre><code class="language-rust hljs">async <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">handle</span></span>(<span class="hljs-keyword">mut</span> stream: TcpStream) {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> buf = [<span class="hljs-number">0</span>; <span class="hljs-number">1024</span>];
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> slice = &amp;<span class="hljs-keyword">mut</span> buf[<span class="hljs-number">0</span>..];
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> counter = <span class="hljs-number">0</span>;
+
+    <span class="hljs-keyword">loop</span> {
+        <span class="hljs-keyword">match</span> await!(stream.read_async(slice)).unwrap() {
+            <span class="hljs-number">0</span> =&gt; {
+                <span class="hljs-built_in">println!</span>(<span class="hljs-string">"Closed.  Received {} bytes."</span>, counter);
+                <span class="hljs-keyword">break</span>;
+            }, <span class="hljs-comment">// Socket closed</span>
+            n =&gt; {
+                counter += n;
+                slice = &amp;<span class="hljs-keyword">mut</span> buf[counter..];
+            },
+        }
+    }
+}
+</code></pre>
+<p>A, not particularly useful, <em>async handler</em> to <em>count bytes received</em>.</p>
+<p>When called <em>the function returns a future</em> that <em>should be executed by an event-loop</em>.
+The execution is <em>asynchronous</em> and control <em>returns to the event-loop at each <code>await!</code></em> call.</p>
+<p><strong>Internals:</strong> state <em>encoded as an <code>enum</code></em> across <em>yield points</em>.</p>
+<pre><code class="language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">AsyncState</span></span> {
+    Initial,
+    LoopAwait(...state...),
+    Done,
+}
+
+<span class="hljs-keyword">impl</span> Future <span class="hljs-keyword">for</span> AsyncState {...}
+</code></pre>
+<p>The <em><code>state</code> is self-referential</em>:  <code>slice</code> points to <code>buf</code>.</p>
+<p><em><code>unsafe</code> saves the day</em>: the <code>async</code> code is generated by the compiler.</p>
+<t-section id="storing-futures" data-section-level="3"><h3 class="section-header"><a href="#storing-futures">Storing Futures</a></h3><div class="section-content">
+<p><strong>Issue:</strong> the future object can still <em>not move</em>.<br>
+Only when it is indeed self-referential.</p>
+<p><strong>Observation:</strong> can be moved in the <code>Initial</code> state.<br>
+Useful when using combinators: <code>and_then</code>, <code>map_err</code>, etc.</p>
+<p><strong>Pinned reference:</strong> abstracts pointer to the self-referential data.</p>
+<ol>
+<li>provide only <em>unsafe access to</em> <code>&amp;mut T</code></li>
+<li>allow modification (in place): <code>set(val: T)</code></li>
+<li>constructor is <code>unsafe</code>: guarantee immovability (eg. using box)</li>
+<li>provide wrappers: <code>Box::pinned(state) -&gt; Pin&lt;Box&lt;T&gt;&gt;</code></li>
+</ol>
+<p><em>Future</em> functionalities mandate <em>pinned reference</em>.</p>
+</div></t-section><t-section id="future-trait" data-section-level="3"><h3 class="section-header"><a href="#future-trait">Future Trait</a></h3><div class="section-content">
+<pre><code class="language-rust hljs"><span class="hljs-comment">// libcore/future/future.rs</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Future</span></span> {
+    <span class="hljs-comment">/// The result of the `Future`.</span>
+    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Output</span></span>;
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">poll</span></span>(<span class="hljs-keyword">self</span>: Pin&lt;&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">Self</span>&gt;, cx: &amp;<span class="hljs-keyword">mut</span> task::Context)
+        -&gt; Poll&lt;Self::Output&gt;;
+}
+</code></pre>
+<p>Forces creation of <code>Pin&lt;&amp;mut Self&gt;</code>.</p>
+<p>Only for <code>poll</code>:  can move before <code>poll</code>.<br>
+Useful for combinators: <code>and_then</code>, etc.</p>
+<p>Unsafe for self-referential future.<br>
+Can use wrappers: <code>Box::pinned(state)</code>.</p>
+<pre><code class="language-rust hljs"><span class="hljs-keyword">impl</span>&lt;T&gt; <span class="hljs-built_in">Box</span>&lt;T&gt; {
+    <span class="hljs-meta">#[stable(feature = <span class="hljs-meta-string">"rust1"</span>, since = <span class="hljs-meta-string">"1.0.0"</span>)]</span>
+    <span class="hljs-meta">#[inline(always)]</span>
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(x: T) -&gt; <span class="hljs-built_in">Box</span>&lt;T&gt; {
+        <span class="hljs-keyword">box</span> x
+    }
+
+    <span class="hljs-meta">#[unstable(feature = <span class="hljs-meta-string">"pin"</span>, issue = <span class="hljs-meta-string">"49150"</span>)]</span>
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">pinned</span></span>(x: T) -&gt; Pin&lt;<span class="hljs-built_in">Box</span>&lt;T&gt;&gt; {
+        <span class="hljs-keyword">unsafe</span> { Pin::new_unchecked(<span class="hljs-keyword">box</span> x) }
+    }
+}
+</code></pre>
+<p>End user is provided highly optimized, and type-safe <code>Future</code>.<br>
+Can apply combinators at will to express app. logic.</p>
+<p>Self-referential futures marked as <code>!UnPin</code>.</p>
+<p>Event-loops <code>poll</code> the <code>Future</code>.<br>
+Automatically boxed when necessary by <code>tokio</code>, etc.</p>
+
+</div></t-section></div></t-section><t-section id="pinning-api" data-section-level="2"><h2 class="section-header"><a href="#pinning-api">Pinning API</a></h2><div class="section-content">
+<p>Allows safe handling of self-referential structs.<br>
+Creating needs <code>unsafe</code> or wrappers.</p>
+<t-section id="self-ref.-struct" data-section-level="3"><h3 class="section-header"><a href="#self-ref.-struct">Self Ref. Struct</a></h3><div class="section-content">
+<p>Re-visiting self-ref. structure:</p>
+<pre><code class="language-rust hljs"><span class="hljs-keyword">use</span> std::ptr::NonNull;
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">SelfR</span></span>&lt;T&gt; {
+    data: T,
+    pointer: NonNull&lt;T&gt;,
+}
+
+<span class="hljs-keyword">impl</span>&lt;T&gt; SelfR&lt;T&gt; {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(data: T) -&gt; <span class="hljs-keyword">Self</span> {
+        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> obj = SelfR {data, pointer: NonNull::dangling()};
+        obj.pointer = NonNull::from(&amp;obj.data);
+        obj
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> obj = SelfR::new(<span class="hljs-built_in">String</span>::from(<span class="hljs-string">"hello"</span>));
+    <span class="hljs-built_in">assert_eq!</span>(NonNull::from(&amp;obj.data), obj.pointer);
+}
+</code></pre>
+<p>Compiles, but run-time assertion fails.<br>
+Object has moved after we created.</p>
+<pre><code class="hljs coq">thread 'main' panicked <span class="hljs-built_in">at</span> 'assertion failed: `(<span class="hljs-built_in">left</span> == <span class="hljs-built_in">right</span>)`
+  <span class="hljs-built_in">left</span>: `<span class="hljs-number">0x7ffe3ef6b958</span>`,
+ <span class="hljs-built_in">right</span>: `<span class="hljs-number">0x7ffe3ef6b890</span>`', self-ref-not-null.rs:<span class="hljs-number">18</span>:<span class="hljs-number">5</span>
+</code></pre>
+<p>We must box the data to keep it safe when moved.</p>
+<pre><code class="language-rust hljs"><span class="hljs-keyword">impl</span>&lt;T&gt; SelfR&lt;T&gt; {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(data: T) -&gt; <span class="hljs-built_in">Box</span>&lt;<span class="hljs-keyword">Self</span>&gt; {
+        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> obj = SelfR {data, pointer: NonNull::dangling()};
+        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> boxed = <span class="hljs-built_in">Box</span>::from(obj);
+        (*boxed).pointer = NonNull::from(&amp;(*boxed).data);
+        boxed
+    }
+}
+</code></pre>
+<p>Still does not prevent explicit moves:</p>
+<pre><code class="language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> obj1 = SelfR::new(<span class="hljs-built_in">String</span>::from(<span class="hljs-string">"hello"</span>));
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> obj2 = SelfR::new(<span class="hljs-built_in">String</span>::from(<span class="hljs-string">"world"</span>));
+
+    std::mem::swap(obj1.as_mut(), obj2.as_mut());
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{} {}"</span>, obj1.data, <span class="hljs-keyword">unsafe</span> {obj1.pointer.as_ref()});
+}
+</code></pre>
+<p>Output: <code>world hello</code>.<br>
+The objects may be moved via <code>mem::{swap, replace}</code>.</p>
+</div></t-section><t-section id="pinned-reference" data-section-level="3"><h3 class="section-header"><a href="#pinned-reference">Pinned Reference</a></h3><div class="section-content">
+<p>We import a few types.</p>
+<pre><code class="language-rust hljs"><span class="hljs-meta">#![feature(pin)]</span>
+
+<span class="hljs-keyword">use</span> std::pin::PinBox;
+<span class="hljs-keyword">use</span> std::marker::Pinned;
+<span class="hljs-keyword">use</span> std::ptr::NonNull;
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">SelfR</span></span>&lt;T&gt; {
+    data: T,
+    pointer: NonNull&lt;T&gt;,
+    _pin: Pinned
+}
+</code></pre>
+<p><code>Pinned</code> is a marker to mark SelfR as <code>!Unpin</code>.<br>
+<code>Unpin</code> is an auto-trait as self-ref. data is special.</p>
+<p>Use <code>PinBox</code> to copy data to heap.<br>
+<em>Then</em>, create self-reference.</p>
+<pre><code class="language-rust hljs"><span class="hljs-keyword">impl</span>&lt;T&gt; SelfR&lt;T&gt; {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(data: T) -&gt; PinBox&lt;<span class="hljs-keyword">Self</span>&gt; {
+
+        <span class="hljs-keyword">let</span> obj = SelfR {
+            data,
+            pointer: NonNull::dangling(),
+            _pin: Pinned
+        };
+        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> boxed = PinBox::new(obj);
+        <span class="hljs-keyword">let</span> pointer = NonNull::from(&amp;boxed.data);
+
+        <span class="hljs-keyword">unsafe</span> { PinBox::get_mut(&amp;<span class="hljs-keyword">mut</span> boxed).pointer = pointer };
+        boxed
+    }
+}
+</code></pre>
+<pre><code class="language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> obj1 = SelfR::new(<span class="hljs-built_in">String</span>::from(<span class="hljs-string">"hello"</span>));
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> obj2 = SelfR::new(<span class="hljs-built_in">String</span>::from(<span class="hljs-string">"world"</span>));
+    std::mem::swap(&amp;<span class="hljs-keyword">mut</span> *obj1, &amp;<span class="hljs-keyword">mut</span> *obj2);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{} {}"</span>, obj1.data, <span class="hljs-keyword">unsafe</span> {obj1.pointer.as_ref()});
+}
+</code></pre>
+<p>This does not compile.  <code>mut</code> access not available to <code>!Unpin</code> types.</p>
+<p>Without <code>Pinned</code>, it compiles to previous (incorrect) output.</p>
+
+</div></t-section></div></t-section><t-section id="references" data-section-level="2"><h2 class="section-header"><a href="#references">References</a></h2><div class="section-content">
+<ol>
+<li><a href="https://boats.gitlab.io/blog/post/2018-01-25-async-i-self-referential-structs/">Series of Blogs on Async/Await design</a></li>
+<li><a href="https://www.ralfj.de/blog/2018/04/05/a-formal-look-at-pinning.html">Formal Verification of Pinning</a></li>
+<li><a href="https://github.com/rust-lang/rust/pull/50850/files">Async Implementation PR</a></li>
+<li><a href="https://aturon.github.io/apr/task-model/intro.html">Async Programming Guide</a></li>
+<li><a href="https://tokio.rs/blog/2018-08-async-await/">Tokio Async Await</a></li>
+</ol>
+</div></t-section></t-document></body></html>

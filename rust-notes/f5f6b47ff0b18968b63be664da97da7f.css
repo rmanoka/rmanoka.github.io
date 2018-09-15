@@ -1,0 +1,74 @@
+body {
+  left: 0px;
+  top: 0px;
+  width: 100vw;
+  height: 100vh;
+  margin: 0px;
+}
+t-presentation {
+  display: block;
+  position: absolute;
+  left: 0px;
+  top: 2vh;
+  bottom: 2vh;
+  right: 0px;
+  overflow-y: scroll;
+  font-size: 1.5rem;
+}
+t-document {
+  max-width: initial;
+  text-align: left;
+}
+t-document p, t-document li, t-document .section-header, t-document pre {
+    max-width: 60rem;
+    margin: auto;
+
+    margin-bottom: 1ex;
+    margin-top: 1ex;
+/*
+    &.present, &.active {
+      margin-top: 1ex;
+      margin-bottom: 1ex;
+    } */
+  }
+t-document .section-header.present {
+    font-size: 1.5em;
+  }
+t-document t-section.future, t-document li.future, t-document p.future, t-document title-block.future, t-document pre.future, t-document blockquote.future {
+  display: none;
+}
+t-document t-section.active, t-document li.active, t-document p.active, t-document title-block.active, t-document pre.active, t-document blockquote.active {
+  font-size: 1.2em;
+  border: solid 1pt rgba(120, 160, 20, 0.8);
+  padding: 1ex 0.25em;
+}
+t-document t-section.active em, t-document t-section.active strong, t-document li.active em, t-document li.active strong, t-document p.active em, t-document p.active strong, t-document title-block.active em, t-document title-block.active strong, t-document pre.active em, t-document pre.active strong, t-document blockquote.active em, t-document blockquote.active strong {
+      font-size: 1.2em;
+      margin-left: 0.25em;
+      margin-right: 0.25em;
+}
+t-document t-section.present>.section-header, t-document li.present>.section-header, t-document p.present>.section-header, t-document title-block.present>.section-header, t-document pre.present>.section-header, t-document blockquote.present>.section-header {
+  font-size: 1.2em;
+}
+t-document t-section.past, t-document li.past, t-document p.past, t-document title-block.past, t-document pre.past, t-document blockquote.past {
+  color: rgba(0, 0, 0, 0.7);
+}
+t-document t-section {
+    display: block
+
+    /* &.past {
+      display: none;
+    } */
+  }
+t-document t-section.active, t-document t-section.present {
+  min-height: 75vh;
+}
+t-document pre {
+    border: solid 1pt brown
+  }
+t-document pre.active {
+  white-space: pre-wrap;
+}
+t-document title-block.past {
+    display: none;
+  }

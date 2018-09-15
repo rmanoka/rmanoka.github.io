@@ -1,0 +1,115 @@
+title-block, .title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin: 4ex 0;
+}
+    title-block h1, .title-block h1 {
+      padding: 0 0;
+      margin: 0.5ex 0;
+    }
+    title-block h2, .title-block h2 {
+      padding: 0 0;
+      margin: 0.5ex 0;
+    }
+    title-block h3, .title-block h3 {
+      padding: 0 0;
+      margin: 0.5ex 0;
+    }
+    title-block h4, .title-block h4 {
+      padding: 0 0;
+      margin: 0.5ex 0;
+    }
+    title-block h5, .title-block h5 {
+      padding: 0 0;
+      margin: 0.5ex 0;
+    }
+    title-block h6, .title-block h6 {
+      padding: 0 0;
+      margin: 0.5ex 0;
+    }
+
+t-document {
+  display: block;
+  padding: 1em;
+  font-family: sans-serif;
+  max-width: 40em;
+  margin: auto;
+}
+
+t-document ol ol {
+    list-style-type: lower-roman;
+  }
+
+@media screen and (max-width: 40em) {
+  t-document ol, t-document ul {
+      padding-left: 1.1em;
+  }
+}
+
+definition {
+  display: block;
+  border: 1pt solid black;
+  padding: 0 0.5em;
+}
+
+definition> article > p:first-child, definition> p:first-child {
+  text-decoration: underline;
+}
+
+abstract {
+  font-size: 0.9em;
+  display: block;
+  margin-top: 1ex;
+  max-width: 40em
+}
+
+abstract:before {
+  display: inline;
+  content: 'Abstract.';
+  margin-right: 0.5em;
+  font-weight: bolder;
+}
+
+abstract-block {
+  font-size: 0.9em;
+  display: block;
+  margin-top: 1ex;
+  max-width: 40em
+}
+
+abstract-block>p:first-child:before {
+  display: inline;
+  content: 'Abstract.';
+  margin-right: 0.5em;
+  font-weight: bolder;
+}
+
+figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+figure img {
+    max-width: 100%;
+    max-height: 90vh;
+    border: 1pt solid brown;
+  }
+
+figure img-caption {
+  font-weight: bold;
+  font-size: 0.8em;
+  }
+
+t-document {
+  font-family: 'Open Sans';
+  text-align: justify;
+}
+
+t-document todo {
+    display: block;
+    border: 1pt solid gold;
+    padding: 0.5ex 0.5em;
+  }

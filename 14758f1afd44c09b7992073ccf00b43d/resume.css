@@ -1,0 +1,128 @@
+:root {
+    --page-width: 50em;
+
+    /* --main-font: sans-serif; */
+    --main-font: 'Roboto', sans-serif;
+
+    --alt-color: navy;
+}
+
+
+@page {
+    size: A4;
+    margin: 0.8in 0.4in;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100vw;
+    box-sizing: border-box;
+}
+
+body {
+    padding: 1ex 1em;
+    font-family: var(--main-font);
+}
+
+.main-wrapper {
+    max-width: var(--page-width);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: last baseline;
+}
+
+.header i {
+    vertical-align: middle;
+}
+
+.header .profile {
+    max-width: 10em;
+}
+
+.sub-section {
+    margin-left: 0.5em;
+}
+
+p {
+    margin: 0;
+}
+
+@media print {
+    .subsection {
+        break-inside: avoid-page;
+    }
+
+    .break-after {
+        break-after: always;
+    }
+
+    .break-before {
+        break-before: always;
+    }
+}
+
+.header .content h1 {
+    margin: 0;
+}
+
+.title-float {
+    height: 0;
+}
+
+.title-float h1 {
+    margin: 0;
+    text-decoration: underline;
+}
+
+.main-content h2 {
+    color: var(--alt-color);
+}
+
+.main-content h3 {
+    margin-bottom: 0;
+}
+
+.main-content ul {
+    margin: 0;
+    list-style-type: square;
+}
+
+.main-content li {
+    max-width: 40em;
+    text-align: justify;
+}
+
+.centered {
+    text-align: center !important;
+}
+
+.right {
+    float: right !important;
+}
+
+.normal {
+    font-weight: normal !important;
+}
+
+.larger {
+    font-size: larger !important;
+}
+
+.smaller {
+    font-size: smaller !important;
+}
+
+.altcolor {
+    color: var(--alt-color) !important;
+}
+
+.margin-after {
+    margin-bottom: 2ex !important;
+}

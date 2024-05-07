@@ -1,4 +1,4 @@
-"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[297],{2297:function(e,i,t){t.d(i,{APIChain:function(){return APIChain}});var a=t(8699),s=t(2738),n=t(6827);let r=`You are given the below API Documentation:
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[831],{5831:function(e,i,t){t.d(i,{APIChain:function(){return APIChain}});var a=t(4563),s=t(5198),n=t(6827);let r=`You are given the below API Documentation:
 {api_docs}
 Using this documentation, generate the full API url to call for answering the user question.
 You should build the API url in order to get a response that is as short as possible, while still getting the necessary information to answer the question. Pay attention to deliberately exclude any unnecessary pieces of data in the API call.
